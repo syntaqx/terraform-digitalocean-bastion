@@ -22,5 +22,4 @@ module "bastion" {
 
   ssh_keys        = ["${digitalocean_ssh_key.bastion.id}"]
   ssh_private_key = "${tls_private_key.bastion.private_key_pem}"
-
 }

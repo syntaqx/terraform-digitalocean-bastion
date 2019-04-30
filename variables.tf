@@ -1,42 +1,53 @@
 variable "prefix" {
+  description = "The name prefix given to all created resources."
 }
 
 variable "region" {
+  description = "The region to deploy resources to."
 }
 
 variable "image" {
-  default = "ubuntu-18-04-x64"
+  description = "The DigitalOcean droplet image name or slug."
+  default     = "ubuntu-18-04-x64"
 }
 
 variable "size" {
-  default = "512mb"
+  description = "The DigitalOcean droplet size slug."
+  default     = "512mb"
 }
 
 variable "ssh_keys" {
-  type = "list"
+  description = "A list of SSH IDs or fingerprints to enable in the format [12345, 123456]."
+  type        = "list"
 }
 
 variable "tags" {
-  type    = "list"
-  default = []
+  description = "A list of the tags to label this Droplet. A tag resource must exist before it can be associated."
+  type        = "list"
+  default     = []
 }
 
 variable "backups" {
-  default = false
+  description = "Whether to enable backups. Defaults to false."
+  default     = false
 }
 
 variable "monitoring" {
-  default = true
+  description = "Whether to enable the current monotiring agent. Defaults to true."
+  default     = true
 }
 
 variable "ssh_username" {
-  default = "root"
+  description = "User to use to login to the resource."
+  default     = "root"
 }
 
 variable "ssh_private_key" {
-  default = ""
+  description = "The private SSH key. If this is a file, it can be read using the file interpolation function."
+  default     = ""
 }
 
 variable "allowed_source_addresses" {
-  default = ["0.0.0.0/0", "::/0"]
+  description = "An array of strings containing the IPv4/6 addresses, and IPv4/6 CIDRs from which the inbound traffic will be accepted."
+  default     = ["0.0.0.0/0", "::/0"]
 }

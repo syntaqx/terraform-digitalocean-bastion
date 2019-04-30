@@ -1,4 +1,5 @@
 provider "digitalocean" {
+  version = "~> 1.2"
 }
 
 data "template_file" "cloud_config" {
@@ -14,12 +15,12 @@ resource "digitalocean_droplet" "bastion" {
   region   = "${var.region}"
   image    = "${var.image}"
   size     = "${var.size}"
-  ssh_keys = ["${var.ssh_keys}"]
   tags     = ["${var.tags}"]
+  ssh_keys = ["${var.ssh_keys}"]
 
   private_networking = true
   ipv6               = true
-  monitoring         = false
+  monitoring         = false # Legacy monitoring agent
   backups            = "${var.backups}"
 
   user_data = "${data.template_file.cloud_config.rendered}"
