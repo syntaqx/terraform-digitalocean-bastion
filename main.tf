@@ -20,7 +20,7 @@ resource "digitalocean_droplet" "bastion" {
 
   private_networking = true
   ipv6               = true
-  monitoring         = false # Legacy monitoring agent
+  monitoring         = false            # Legacy monitoring agent
   backups            = "${var.backups}"
 
   user_data = "${data.template_file.cloud_config.rendered}"

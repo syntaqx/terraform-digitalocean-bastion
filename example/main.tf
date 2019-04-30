@@ -1,5 +1,4 @@
-provider "digitalocean" {
-}
+provider "digitalocean" {}
 
 locals {
   env = "${terraform.workspace == "default" ? "dev" : terraform.workspace}"
