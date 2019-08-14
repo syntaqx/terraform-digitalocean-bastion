@@ -30,7 +30,8 @@ resource "digitalocean_droplet" "bastion" {
     timeout     = "2m"
   }
 
-  # https://www.packer.io/docs/other/debugging.html#issues-installing-ubuntu-packages
+  # Block until cloud-init has finished so module usecases don't have to.
+  # https://github.com/terraform-providers/terraform-provider-digitalocean/issues/280
   provisioner "remote-exec" {
     script = "${path.module}/scripts/wait_for_cloud_init.sh"
   }
@@ -42,9 +43,27 @@ resource "digitalocean_floating_ip_assignment" "bastion" {
 }
 
 resource "digitalocean_firewall" "bastion" {
-  name        = format("%s-bastion-inbound-ssh-fw", var.prefix)
+  name        = format("%s-bastion-fw", var.prefix)
   droplet_ids = [digitalocean_droplet.bastion.id]
 
+  outbound_rule {
+    protocol              = "icmp"
+    destination_addresses = ["0.0.0.0/0", "::/0"]
+  }
+
+  outbound_rule {
+    protocol              = "tcp"
+    port_range            = "1-65535"
+    destination_addresses = ["0.0.0.0/0", "::/0"]
+  }
+
+  outbound_rule {
+    protocol              = "udp"
+    port_range            = "1-65535"
+    destination_addresses = ["0.0.0.0/0", "::/0"]
+  }
+
+  # Bastions are for SSH so this should be the only port needed?
   inbound_rule {
     protocol         = "tcp"
     port_range       = "22"
