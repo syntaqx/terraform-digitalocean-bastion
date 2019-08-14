@@ -7,10 +7,11 @@ resource "tls_private_key" "bastion" {
 
 resource "local_file" "ssh_key" {
   filename = ".ssh/bastion_rsa"
-  content  = "${tls_private_key.bastion.private_key_pem}"
+  content  = tls_private_key.bastion.private_key_pem
 }
 
 resource "local_file" "ssh_key_public" {
   filename = ".ssh/bastion_rsa.pub"
-  content  = "${tls_private_key.bastion.public_key_openssh}"
+  content  = tls_private_key.bastion.public_key_openssh
 }
+

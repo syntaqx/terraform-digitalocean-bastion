@@ -1,32 +1,14 @@
 # Terraform - Bastion (DigitalOcean)
 
 [![CircleCI](https://circleci.com/gh/syntaqx/terraform-digitalocean-bastion.svg?style=shield)](https://circleci.com/gh/syntaqx/terraform-digitalocean-bastion)
-![Latest GitHub Pre-Release](https://img.shields.io/github/tag-pre/syntaqx/terraform-digitalocean-bastion.svg?label=pre-release)
+[![Latest GitHub Pre-Release](https://img.shields.io/github/tag-pre/syntaqx/terraform-digitalocean-bastion.svg?label=pre-release)](https://registry.terraform.io/modules/syntaqx/bastion/digitalocean)
 
 Terraform module for provisioning a Bastion Host on DigitalOcean
 
 ## Prerequisites
 
-* DigitalOcean Account
-* [Terraform](https://www.terraform.io/)
-
-## Getting started
-
-```hcl
-resource "digitalocean_ssh_key" "bastion" {
-  name       = "bastion"
-  public_key = "${file("~/.ssh/bastion_rsa.pub")}"
-}
-
-module "bastion" {
-  source = "syntaqx/bastion/digitalocean"
-  prefix = "${format("example-%s", local.env)}"
-  region = "nyc3"
-
-  ssh_keys        = ["${digitalocean_ssh_key.bastion.id}"]
-  ssh_private_key = "${file("~/.ssh/bastion_rsa")}"
-}
-```
+* [Terraform](https://www.terraform.io/) >= 0.12
+* [DigitalOcean API Token](https://cloud.digitalocean.com/account/api/tokens)
 
 ## Security vulnerabilities
 

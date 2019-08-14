@@ -4,6 +4,7 @@ variable "prefix" {
 
 variable "region" {
   description = "The region to deploy resources to."
+  default     = "nyc3"
 }
 
 variable "image" {
@@ -13,17 +14,18 @@ variable "image" {
 
 variable "size" {
   description = "The DigitalOcean droplet size slug."
-  default     = "512mb"
+  default     = "s-1vcpu-1gb"
 }
 
 variable "ssh_keys" {
   description = "A list of SSH IDs or fingerprints to enable in the format [12345, 123456]."
-  type        = "list"
+  type        = list(string)
+  default     = []
 }
 
 variable "tags" {
   description = "A list of the tags to label this Droplet. A tag resource must exist before it can be associated."
-  type        = "list"
+  type        = list(string)
   default     = []
 }
 
@@ -34,6 +36,11 @@ variable "backups" {
 
 variable "monitoring" {
   description = "Whether to enable the current monotiring agent. Defaults to true."
+  default     = true
+}
+
+variable "ssh_agent" {
+  description = "Whether to enable sharing the hosts ssh-agent. Defaults to true."
   default     = true
 }
 

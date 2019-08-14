@@ -1,68 +1,73 @@
-provider "digitalocean" {
-  version = "~> 1.2"
-}
-
 data "template_file" "cloud_config" {
-  template = "${file("${path.module}/templates/cloud-config.tpl")}"
+  template = file("${path.module}/templates/cloud-config.tpl")
 }
 
 resource "digitalocean_floating_ip" "bastion" {
-  region = "${var.region}"
+  region = var.region
 }
 
 resource "digitalocean_droplet" "bastion" {
-  name     = "${format("%s-bastion-%s", var.prefix, var.region)}"
-  region   = "${var.region}"
-  image    = "${var.image}"
-  size     = "${var.size}"
-  tags     = ["${var.tags}"]
-  ssh_keys = ["${var.ssh_keys}"]
+  name     = format("%s-bastion-%s", var.prefix, var.region)
+  region   = var.region
+  image    = var.image
+  size     = var.size
+  tags     = var.tags
+  ssh_keys = var.ssh_keys
 
   private_networking = true
   ipv6               = true
-  monitoring         = false            # Legacy monitoring agent
-  backups            = "${var.backups}"
+  monitoring         = var.monitoring
+  backups            = var.backups
 
-  user_data = "${data.template_file.cloud_config.rendered}"
+  user_data = data.template_file.cloud_config.rendered
 
   connection {
+    host        = self.ipv4_address
     type        = "ssh"
-    agent       = false
-    user        = "${var.ssh_username}"
-    private_key = "${var.ssh_private_key}"
+    agent       = var.ssh_agent
+    user        = var.ssh_username
+    private_key = var.ssh_private_key
     timeout     = "2m"
   }
 
-  # Outputs cloud-init and lets the boot finish before Terraform considers the
-  # resource creation to be completed.
+  # Block until cloud-init has finished so module usecases don't have to.
+  # https://github.com/terraform-providers/terraform-provider-digitalocean/issues/280
   provisioner "remote-exec" {
-    inline = [
-      "tail -f /var/log/cloud-init-output.log &",
-      "until [ -f /var/lib/cloud/instance/boot-finished ]; do sleep 1; done",
-    ]
-  }
-
-  # https://www.digitalocean.com/docs/monitoring/how-to/upgrade-legacy-agent/
-  provisioner "remote-exec" {
-    inline = [
-      "apt-get -y purge do-agent",
-      "${var.monitoring} && then curl -sSL https://insights.nyc3.cdn.digitaloceanspaces.com/install.sh | sudo bash",
-    ]
+    script = "${path.module}/scripts/wait_for_cloud_init.sh"
   }
 }
 
 resource "digitalocean_floating_ip_assignment" "bastion" {
-  ip_address = "${digitalocean_floating_ip.bastion.id}"
-  droplet_id = "${digitalocean_droplet.bastion.id}"
+  ip_address = digitalocean_floating_ip.bastion.id
+  droplet_id = digitalocean_droplet.bastion.id
 }
 
 resource "digitalocean_firewall" "bastion" {
-  name        = "${format("%s-bastion-inbound-ssh-fw", var.prefix)}"
-  droplet_ids = ["${digitalocean_droplet.bastion.id}"]
+  name        = format("%s-bastion-fw", var.prefix)
+  droplet_ids = [digitalocean_droplet.bastion.id]
 
+  outbound_rule {
+    protocol              = "icmp"
+    destination_addresses = ["0.0.0.0/0", "::/0"]
+  }
+
+  outbound_rule {
+    protocol              = "tcp"
+    port_range            = "1-65535"
+    destination_addresses = ["0.0.0.0/0", "::/0"]
+  }
+
+  outbound_rule {
+    protocol              = "udp"
+    port_range            = "1-65535"
+    destination_addresses = ["0.0.0.0/0", "::/0"]
+  }
+
+  # Bastions are for SSH so this should be the only port needed?
   inbound_rule {
     protocol         = "tcp"
     port_range       = "22"
-    source_addresses = ["${var.allowed_source_addresses}"]
+    source_addresses = var.allowed_source_addresses
   }
 }
+
