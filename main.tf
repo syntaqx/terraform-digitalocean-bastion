@@ -24,7 +24,7 @@ resource "digitalocean_droplet" "bastion" {
   connection {
     host        = self.ipv4_address
     type        = "ssh"
-    agent       = false
+    agent       = var.ssh_agent
     user        = var.ssh_username
     private_key = var.ssh_private_key
     timeout     = "2m"
