@@ -2,12 +2,14 @@ version: 2
 jobs:
   validate_terraform:
     docker:
-      - image: hashicorp/terraform
+      - image: hashicorp/terraform:light
+        environment:
+          DIGITALOCEAN_TOKEN: mocked
     steps:
       - checkout
       - run: terraform init
       - run: "[ -z \"$(terraform fmt -write=false)\" ] || { terraform fmt -write=false -diff; exit 1; }"
-      - run: terraform validate -check-variables=false
+      - run: terraform validate
 workflows:
   version: 2
   deploy:
